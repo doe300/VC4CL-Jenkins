@@ -1,0 +1,34 @@
+pipeline {
+    agent { label 'slave && run_env && llvm39' }
+    options {
+        disableConcurrentBuilds()
+    }
+    // TODO can these be moved to the shared files?
+    parameters {
+        string(name: 'VC4C_BRANCH', defaultValue: 'master', description: 'VC4C branch to get latest CI packages for')
+        string(name: 'VC4C_BUILD_NUM', defaultValue: '', description: 'VC4C CI build number to get the packages for')
+        string(name: 'VC4CL_BRANCH', defaultValue: 'master', description: 'VC4CL branch to get latest CI packages for')
+        string(name: 'VC4CL_BUILD_NUM', defaultValue: '', description: 'VC4CL CI build number to get the packages for')
+        string(name: 'CONFORMANCE_TEST_DIR', defaultValue: env.OPENCL_CTS_DIR, description: 'Folder containing the test executables')
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    cleanWs()
+
+                    // Load the job specific groovy library
+                    tests = load './OpenCL-CTS.groovy'
+
+                    // Configure the test
+                    setup = [vc4c_branch: params.VC4C_BRANCH, vc4cl_branch: params.VC4CL_BRANCH,
+                             vc4c_build: params.VC4C_BUILD_NUM, vc4cl_build: params.VC4CL_BUILD_NUM]
+                    
+                    // Run the actual test
+                    tests.runTests(scriptDir: './', setupConfig: setup, conformanceTestDir: params: CONFORMANCE_TEST_DIR)
+                }
+            }
+        }
+    }
+}
