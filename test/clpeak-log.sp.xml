@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<clpeak os="Linux ARM">
+  <platform name="OpenCL for the Raspberry Pi VideoCore IV GPU">
+    <device name="VideoCore IV GPU" driver_version="0.4" compute_units="1" clock_frequency="250" clock_frequency_unit="MHz">
+      <single_precision_compute unit="gflops">
+        <float>0.257547</float>
+        <float2>0.779029</float2>
+        <float4>1.58109</float4>
+        <float8>2.59161</float8>
+        <float16>4.25156</float16>
+      </single_precision_compute>
+    </device>
+  </platform>
+</clpeak>
