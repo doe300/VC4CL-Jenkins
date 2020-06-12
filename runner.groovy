@@ -72,7 +72,7 @@ class TestResult {
  * Optional parameters:
  * - skipSetup - if set, the setup will be skipped, i.e. the packages for VC4C, VC4CL and VC4CLStdLib will not be installed
  * - setupConfig - if set, this object will be passed to the #installPackages() function (see setup.groovy) to customize the package installation
- * - generateTestResults - if set, this function taking a TestResult and a long (test duration) will be used to create a TestCase (see junit-report.groovy) for this given test
+ * - generateTestResults - if set, this function taking a TestResult and a long (test duration) will be used to create a list of TestCase objects (see junit-report.groovy) for this given test
  * - checkTestPassed - if set (and "generateTestResults" is not given), this function taking an int (the test process return value) and two Strings (the test process standard output and error)
  *                     will be used to determine whether the test has passed (returns true) or failed (returns false). If not set, a test is assumed to have passed when it's return value is zero (0).
  * - extractProfile - if set, this function takes a TestResult object and returns a String to the file used to extract profiling information from
