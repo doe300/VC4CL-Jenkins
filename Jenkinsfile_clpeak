@@ -16,7 +16,6 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    cleanWs()
 
                     // Load the job specific groovy library
                     tests = load './clpeak.groovy'
