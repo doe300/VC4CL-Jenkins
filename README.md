@@ -33,7 +33,10 @@ Since this reboot is not really supported by Jenkins (AFAIK), the code for that 
 
 ### Jenkins Job configuration
 
-TODO
+Given a correctly setup Jenkins slave, the Job setup is quite straight-forward.
+The only required configuration is shown in the image below with the example of the clpeak workflow.
+
+![alt text](./screenshot-clpeak.png?raw=true "Clpeak SCM configuration")
 
 ## Test scripts
 Note: The values for expected runtime are on a Raspberry Pi 3B+, they may differ drastically e.g. for a Raspberry Pi A!
