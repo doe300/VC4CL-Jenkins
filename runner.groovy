@@ -55,8 +55,8 @@ def newTest(String name, String commandArg, String unit, xPathSelector) {
 class TestResult {
     String name
     int returnValue
-    String sysout
-    String syserr
+    String stdout
+    String stderr
 }
 
 /**
@@ -114,10 +114,10 @@ def runTests(Map config) {
                     if (config.generateTestResults != null) {
                         test_result = config.generateTestResults(result, duration)
                     } else {
-                        if (hasPassed(result.returnValue, result.sysout, result.syserr)) {
-                            test_result = [junit_scripts.createPassed(name: result.name, timeInSeconds: duration, sysout: result.sysout, syserr: result.syserr)]
+                        if (hasPassed(result.returnValue, result.stdout, result.stderr)) {
+                            test_result = [junit_scripts.createPassed(name: result.name, timeInSeconds: duration, stdout: result.stdout, stderr: result.stderr)]
                         } else {
-                            test_result = [junit_scripts.createFailed(name: result.name, timeInSeconds: duration, sysout: result.sysout, syserr: result.syserr)]
+                            test_result = [junit_scripts.createFailed(name: result.name, timeInSeconds: duration, stdout: result.stdout, stderr: result.stderr)]
                         }
                     }
                     // This jumps into the catch block on error to restart the host
@@ -148,7 +148,7 @@ def runTests(Map config) {
                 try {
                     // If we fail above to reconnect to the slave in the given timeout after rebooting, any following code will fail.
                     // So we try to do something on the slave and then wait a little bit more to give more time to reconnect, if the slave is not available.
-                    sh 'echo "Test run complete, collecting results..."'
+                    sh "echo 'Test run complete in ${duration} seconds, collecting results...'"
                 } catch (ex) {
                     echo 'Slave not yet back up, waiting some more...'
                     sleep time: rebootTimeoutInMinutes, unit: 'MINUTES'
@@ -167,6 +167,7 @@ def runTests(Map config) {
                 }
 
                 // run the reports
+                echo 'Generating test report, this could take a while...'
                 def report_file = junit_scripts.generateReport(name: test.name, tests: test_result)
                 junit report_file
 

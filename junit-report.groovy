@@ -10,8 +10,10 @@ class TestCase {
     String error
     // "A failure is a test which the code has explicitly failed by using the mechanisms for that purpose."
     String failure
-    String sysout
-    String syserr
+    // The contents of the standard output stream. NOTE: This might be a very large string!
+    String stdout
+    // The contents of the standard error stream. NOTE: This might be a very large string!
+    String stderr
 }
 
 /**
@@ -22,13 +24,13 @@ class TestCase {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - sysout - the output of the test process written to standard output
- * - syserr - the output of the test process written to standard error
+ * - stdout - the output of the test process written to standard output
+ * - stderr - the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createTimeout(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, 'Test aborted due to timeout', '', args['sysout'] ?: '', args['syserr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, 'Test aborted due to timeout', '', args['stdout'] ?: '', args['stderr'] ?: '')
 }
 
 /**
@@ -39,13 +41,13 @@ def createTimeout(args) {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - sysout - the output of the test process written to standard output
- * - syserr - the output of the test process written to standard error
+ * - stdout - the output of the test process written to standard output
+ * - stderr - the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createPassed(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, '', '', args['sysout'] ?: '', args['syserr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, '', '', args['stdout'] ?: '', args['stderr'] ?: '')
 }
 
 /**
@@ -56,13 +58,13 @@ def createPassed(args) {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - sysout - the output of the test process written to standard output
- * - syserr - the output of the test process written to standard error
+ * - stdout - the output of the test process written to standard output
+ * - stderr - the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createSkipped(args) {
-    return new TestCase(args.name, args.timeInSeconds, true, '', '', args['sysout'] ?: '', args ['syserr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, true, '', '', args['stdout'] ?: '', args ['stderr'] ?: '')
 }
 
 /**
@@ -74,13 +76,13 @@ def createSkipped(args) {
  *
  * Optional parameters:
  * - message - the error message, e.g. the reason for the failure
- * - sysout - the output of the test process written to standard output
- * - syserr - the output of the test process written to standard error
+ * - stdout - the output of the test process written to standard output
+ * - stderr - the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createFailed(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, '', args.hasProperty('message') ? args.message : 'Failed', args['sysout'] ?: '', args['syserr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, '', args.hasProperty('message') ? args.message : 'Failed', args['stdout'] ?: '', args['stderr'] ?: '')
 }
 
 /**
@@ -115,10 +117,18 @@ def generateReport(args) {
             out.append("<error message=\"${test.error}\" type=\"\"/>\n")
         if(!test.failure.isEmpty())
             out.append("<failure message=\"${test.failure}\" type=\"\"/>\n")
-        if(!test.sysout.isEmpty())
-            out.append("<system-out><![CDATA[${test.sysout}]]></system-out>")
-        if(!test.syserr.isEmpty())
-            out.append("<system-err><![CDATA[${test.syserr}]]></system-err>")
+        if(!test.stdout.isEmpty()) {
+            // For performance reason, don't do a groovy string interpolation, which would duplicate the string
+            out.append('<system-out><![CDATA[')
+            out.append(test.stdout)
+            out.append(']]></system-out>')
+        }
+        if(!test.stderr.isEmpty()) {
+            // For performance reason, don't do a groovy string interpolation, which would duplicate the string
+            out.append('<system-err><![CDATA[')
+            out.append(test.stderr)
+            out.append(']]></system-err>')
+        }
         out.append('</testcase>\n')
     }
 

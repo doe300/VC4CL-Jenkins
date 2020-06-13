@@ -6,19 +6,19 @@ def runTests(Map config) {
 
     // Test out test reports
     reportFile = junit_scripts.generateReport(name: "testReport", tests: [
-        junit_scripts.createTimeout(name: 'SuperTest', timeInSeconds: 15000, syserr: 'Some error'),
+        junit_scripts.createTimeout(name: 'SuperTest', timeInSeconds: 15000, stderr: 'Some error'),
         junit_scripts.createPassed(name: 'DuperTest', timeInSeconds: 150),
-        junit_scripts.createSkipped(name: 'MegaTest', timeInSeconds: 17, sysout: 'Some error'),
-        junit_scripts.createFailed(name: 'GigaTest', timeInSeconds: 42, message: 'Too bad', syserr: 'Some error')
+        junit_scripts.createSkipped(name: 'MegaTest', timeInSeconds: 17, stdout: 'Some error'),
+        junit_scripts.createFailed(name: 'GigaTest', timeInSeconds: 42, message: 'Too bad', stderr: 'Some error')
     ])
     echo "${reportFile}"
     junit "${reportFile}"
 
     reportFile = junit_scripts.generateReport(name: "secondReport", tests: [
-        junit_scripts.createTimeout(name: 'SuperTest', timeInSeconds: 15000, syserr: 'Some error'),
+        junit_scripts.createTimeout(name: 'SuperTest', timeInSeconds: 15000, stderr: 'Some error'),
         junit_scripts.createPassed(name: 'DuperTest', timeInSeconds: 150),
-        junit_scripts.createSkipped(name: 'MegaTest', timeInSeconds: 17, sysout: 'Some error'),
-        junit_scripts.createFailed(name: 'GigaTest', timeInSeconds: 42, message: 'Too bad', syserr: 'Some error')
+        junit_scripts.createSkipped(name: 'MegaTest', timeInSeconds: 17, stdout: 'Some error'),
+        junit_scripts.createFailed(name: 'GigaTest', timeInSeconds: 42, message: 'Too bad', stderr: 'Some error')
     ])
     echo "${reportFile}"
     junit "${reportFile}"
