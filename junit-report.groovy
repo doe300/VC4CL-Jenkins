@@ -10,10 +10,10 @@ class TestCase {
     String error
     // "A failure is a test which the code has explicitly failed by using the mechanisms for that purpose."
     String failure
-    // The contents of the standard output stream. NOTE: This might be a very large string!
-    String stdout
-    // The contents of the standard error stream. NOTE: This might be a very large string!
-    String stderr
+    // The file containing the contents of the standard output stream
+    String stdoutFile
+    // The file containing the contents of the standard error stream
+    String stderrFile
 }
 
 /**
@@ -24,13 +24,13 @@ class TestCase {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - stdout - the output of the test process written to standard output
- * - stderr - the output of the test process written to standard error
+ * - stdoutFile - the file containing the output of the test process written to standard output
+ * - stderrFile - the file containing the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createTimeout(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, 'Test aborted due to timeout', '', args['stdout'] ?: '', args['stderr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, 'Test aborted due to timeout', '', args['stdoutFile'] ?: '', args['stderrFile'] ?: '')
 }
 
 /**
@@ -41,13 +41,13 @@ def createTimeout(args) {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - stdout - the output of the test process written to standard output
- * - stderr - the output of the test process written to standard error
+ * - stdoutFile - the file containing the output of the test process written to standard output
+ * - stderrFile - the file containing the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createPassed(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, '', '', args['stdout'] ?: '', args['stderr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, '', '', args['stdoutFile'] ?: '', args['stderrFile'] ?: '')
 }
 
 /**
@@ -58,13 +58,13 @@ def createPassed(args) {
  * - timeInSeconds - test case duration (timeout) in seconds
  *
  * Optional parameters:
- * - stdout - the output of the test process written to standard output
- * - stderr - the output of the test process written to standard error
+ * - stdoutFile - the file containing the output of the test process written to standard output
+ * - stderrFile - the file containing the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createSkipped(args) {
-    return new TestCase(args.name, args.timeInSeconds, true, '', '', args['stdout'] ?: '', args ['stderr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, true, '', '', args['stdoutFile'] ?: '', args ['stderrFile'] ?: '')
 }
 
 /**
@@ -76,13 +76,13 @@ def createSkipped(args) {
  *
  * Optional parameters:
  * - message - the error message, e.g. the reason for the failure
- * - stdout - the output of the test process written to standard output
- * - stderr - the output of the test process written to standard error
+ * - stdoutFile - the file containing the output of the test process written to standard output
+ * - stderrFile - the file containing the output of the test process written to standard error
  *
  * Returns the newly created TestCase object
  */
 def createFailed(args) {
-    return new TestCase(args.name, args.timeInSeconds, false, '', args.hasProperty('message') ? args.message : 'Failed', args['stdout'] ?: '', args['stderr'] ?: '')
+    return new TestCase(args.name, args.timeInSeconds, false, '', args.hasProperty('message') ? args.message : 'Failed', args['stdoutFile'] ?: '', args['stderrFile'] ?: '')
 }
 
 /**
@@ -100,45 +100,36 @@ def generateReport(args) {
     // - https://stackoverflow.com/questions/4922867/what-is-the-junit-xml-format-specification-that-hudson-supports
     // - https://help.catchsoftware.com/display/ET/JUnit+Format
 
-    // out = StringBuilder.newInstance()
-    // creates a new (synchronized) StringBuffer, but does not require any additional permissions
-    // see: https://stackoverflow.com/questions/1797478/groovy-literal-stringbuilder-stringbuffer
-    out = '' << ''
-
-    out.append('<?xml version="1.0" encoding="UTF-8"?>\n')
-    // out.append('<testsuites disabled="" errors="" failures="" name="" tests="" time="">\n')
-    out.append("<testsuite id=\"${args.name}\" name=\"${args.name}\" tests=\"${args.tests.size()}\">\n")
+    // For performance reasons (and easier normalization of non-printable characters), we run the following commands completely on the slave
+    outFile = "${args.name}-junit.xml"
+    sh "echo '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' > ${outFile}"
+    sh "echo '<testsuite id=\"${args.name}\" name=\"${args.name}\" tests=\"${args.tests.size()}\">\n' >> ${outFile}"
 
     for(test in args.tests) {
-        out.append("<testcase classname=\"${test.name}\" name=\"${test.name}\" status=\"\" time=\"${test.timeInSeconds}\">\n")
+        sh "echo '<testcase classname=\"${test.name}\" name=\"${test.name}\" status=\"\" time=\"${test.timeInSeconds}\">\n' >> ${outFile}"
         if(test.skipped)
-            out.append('<skipped/>\n')
+            sh "echo '<skipped/>\n' >> ${outFile}"
         if(!test.error.isEmpty())
-            out.append("<error message=\"${test.error}\" type=\"\"/>\n")
+            sh "echo '<error message=\"${test.error}\" type=\"\"/>\n' >> ${outFile}"
         if(!test.failure.isEmpty())
-            out.append("<failure message=\"${test.failure}\" type=\"\"/>\n")
-        if(!test.stdout.isEmpty()) {
-            // For performance reason, don't do a groovy string interpolation, which would duplicate the string
-            out.append('<system-out><![CDATA[')
-            out.append(test.stdout)
-            out.append(']]></system-out>')
+            sh "echo '<failure message=\"${test.failure}\" type=\"\"/>\n' >> ${outFile}"
+        if(!test.stdoutFile.isEmpty()) {
+            sh "echo '<system-out><![CDATA[\n' >> ${outFile}"
+            // clean up non-printable characters (e.g. generated by dumping (u)char values)
+            sh "sed 's/[^[:print:]]/\xff\xfd/g' ${test.stdoutFile} >> ${outFile}"
+            sh "echo '\n]]></system-out>' >> ${outFile}"
         }
-        if(!test.stderr.isEmpty()) {
-            // For performance reason, don't do a groovy string interpolation, which would duplicate the string
-            out.append('<system-err><![CDATA[')
-            out.append(test.stderr)
-            out.append(']]></system-err>')
+        if(!test.stderrFile.isEmpty()) {
+            sh "echo '<system-err><![CDATA[\n' >> ${outFile}"
+            // clean up non-printable characters (e.g. generated by dumping (u)char values)
+            sh "sed 's/[^[:print:]]/\xff\xfd/g' ${test.stderrFile} >> ${outFile}"
+            sh "echo '\n]]></system-err>' >> ${outFile}"
         }
-        out.append('</testcase>\n')
+        sh "echo '</testcase>\n' >> ${outFile}"
     }
 
-    out.append('</testsuite>\n')
-    // out.append('</testsuites>\n')
-
-    // Actually write the file
-    writeFile file: "${args.name}-junit.xml", text: out.toString()
-    out = null
-    return "${args.name}-junit.xml"
+    sh "echo '</testsuite>\n' >> ${outFile}"
+    return outFile
 }
 
 // Required so the functions/variables in here are actually available

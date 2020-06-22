@@ -55,8 +55,8 @@ def newTest(String name, String commandArg, String unit, xPathSelector) {
 class TestResult {
     String name
     int returnValue
-    String stdout
-    String stderr
+    String stdoutFile
+    String stderrFile
 }
 
 /**
@@ -73,7 +73,7 @@ class TestResult {
  * - skipSetup - if set, the setup will be skipped, i.e. the packages for VC4C, VC4CL and VC4CLStdLib will not be installed
  * - setupConfig - if set, this object will be passed to the #installPackages() function (see setup.groovy) to customize the package installation
  * - generateTestResults - if set, this function taking a TestResult and a long (test duration) will be used to create a list of TestCase objects (see junit-report.groovy) for this given test
- * - checkTestPassed - if set (and "generateTestResults" is not given), this function taking an int (the test process return value) and two Strings (the test process standard output and error)
+ * - checkTestPassed - if set (and "generateTestResults" is not given), this function taking an int (the test process return value) and two Strings (the paths to the files containing the test process standard output and error)
  *                     will be used to determine whether the test has passed (returns true) or failed (returns false). If not set, a test is assumed to have passed when it's return value is zero (0).
  * - extractProfile - if set, this function takes a TestResult object and returns a String to the file used to extract profiling information from
  * - skipCleanup - if set, the cleanup will be skipped, i.e. the packages for VC4C, VC4CL and VC4CLStdLib will not be uninstalled after the tests have run
@@ -95,7 +95,7 @@ def runTests(Map config) {
         }
     }
 
-    hasPassed = config.containsKey('checkTestPassed') && config.checkTestPassed != null ? config.checkTestPassed : {returnValue, stdout, stderr -> returnValue == 0}
+    hasPassed = config.containsKey('checkTestPassed') && config.checkTestPassed != null ? config.checkTestPassed : {returnValue, stdoutFile, stderrFile -> returnValue == 0}
 
     for (test in config.tests) {
         script {
@@ -114,10 +114,10 @@ def runTests(Map config) {
                     if (config.generateTestResults != null) {
                         test_result = config.generateTestResults(result, duration)
                     } else {
-                        if (hasPassed(result.returnValue, result.stdout, result.stderr)) {
-                            test_result = [junit_scripts.createPassed(name: result.name, timeInSeconds: duration, stdout: result.stdout, stderr: result.stderr)]
+                        if (hasPassed(result.returnValue, result.stdoutFile, result.stderrFile)) {
+                            test_result = [junit_scripts.createPassed(name: result.name, timeInSeconds: duration, stdoutFile: result.stdoutFile, stderrFile: result.stderrFile)]
                         } else {
-                            test_result = [junit_scripts.createFailed(name: result.name, timeInSeconds: duration, stdout: result.stdout, stderr: result.stderr)]
+                            test_result = [junit_scripts.createFailed(name: result.name, timeInSeconds: duration, stdoutFile: result.stdoutFile, stderrFile: result.stderrFile)]
                         }
                     }
                     // This jumps into the catch block on error to restart the host
@@ -223,9 +223,7 @@ def runSingleTest(name, command) {
     full_command = "${command} 1> >(tee stdout.log) 2> >(tee stderr.log >&2)"
     code = sh returnStatus: true, script: full_command
     // TODO there could be a race, since the tee might not yet have finished when the main command is done
-    stdout = readFile 'stdout.log'
-    stderr = readFile 'stderr.log'
-    return new TestResult(name, code, stdout, stderr)
+    return new TestResult(name, code, 'stdout.log', 'stderr.log')
 }
 
 // Required so the functions/variables in here are accessible from the caller
