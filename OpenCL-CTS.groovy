@@ -34,7 +34,7 @@ def runTests(Map config) {
     createTestCommand = {test -> "sudo ${test.commandArg}"}
     hasTestPassed = { returnValue, stdoutFile, stderrFile ->
         // If some tests fail normally (e.g. checks fail), the return value is still reported as success (0), so we need to also check the output
-        errorInStdout = sh returnStdout: true, script: "grep -P 'FAILED (\d+ of \d+ )?test' ${stdoutFile} || echo 'PASSED'"
+        errorInStdout = sh returnStdout: true, script: "grep -P 'FAILED (\\d+ of \\d+ )?test' ${stdoutFile} || echo 'PASSED'"
         returnValue == 0 && !errorInStdout.toString().contains('FAILED')
     }
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, extractProfile: null, checkTestPassed: hasTestPassed)

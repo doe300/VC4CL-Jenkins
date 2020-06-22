@@ -25,7 +25,7 @@ pipeline {
                              vc4c_build: params.VC4C_BUILD_NUM, vc4cl_build: params.VC4CL_BUILD_NUM]
                     
                     // Run the actual test
-                    tests.runTests(scriptDir: './', setupConfig: setup, conformanceTestDir: params: CONFORMANCE_TEST_DIR)
+                    tests.runTests(scriptDir: './', setupConfig: setup, conformanceTestDir: params.CONFORMANCE_TEST_DIR)
                 }
             }
         }
