@@ -219,11 +219,13 @@ def runTests(Map config) {
  */
 def runSingleTest(name, command) {
     // Configures to return the last non-zero (if any) exit code instead of the exit code of the last command, requires bash!
+    outFile = "${name}-stdout.log"
+    errFile = "${name}-stderr.log"
     sh 'set -o pipefail'
-    full_command = "${command} 1> >(tee stdout.log) 2> >(tee stderr.log >&2)"
+    full_command = "${command} 1> >(tee ${outFile}) 2> >(tee ${errFile} >&2)"
     code = sh returnStatus: true, script: full_command
     // TODO there could be a race, since the tee might not yet have finished when the main command is done
-    return new TestResult(name, code, 'stdout.log', 'stderr.log')
+    return new TestResult(name, code, outFile, errFile)
 }
 
 // Required so the functions/variables in here are accessible from the caller

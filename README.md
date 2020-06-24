@@ -29,7 +29,7 @@ Since this reboot is not really supported by Jenkins (AFAIK), the code for that 
   * clang-3.9, llvm-3.9 (for the CI packages, other versions might be required for locally build packages)
   * ssh (also properly configured, for the Jenkins slave agent)
   * opencl-c-headers, ocl-icd-opencl-dev
-  * grep, cat, tee, sed
+  * grep, cat, tee, perl
 
 ### Jenkins Job configuration
 
@@ -65,7 +65,7 @@ Requires:
 
 Results:
 - Expected result: unstable (test failures)
-- Expected runtime: 5-6h
+- Expected runtime: 3-5h
 - Generates JUnit test results (one per test executable)
 - Generates test duration plots (one per test executable)
 
