@@ -18,6 +18,7 @@ def runTests(Map config) {
         runner.newTest('global-bandwidth', '--global-bandwidth', 'GB/s', '/clpeak/platform/device/global_memory_bandwidth/*'),
         runner.newTest('compute-sp', '--compute-sp', 'GFLOP/s', '/clpeak/platform/device/single_precision_compute/*'),
         runner.newTest('compute-integer', '--compute-integer', 'GIOP/s', '/clpeak/platform/device/integer_compute/*'),
+        runner.newTest('compute-intfast', '--compute-intfast', 'GIOP/s', '/clpeak/platform/device/integer_compute_fast/*'),
         runner.newTest('transfer-bandwidth', '--transfer-bandwidth', 'GB/s', '/clpeak/platform/device/transfer_bandwidth/*'),
         runner.newTest('kernel-latency', '--kernel-latency', 'us', '/clpeak/platform/device/*')
     ]
