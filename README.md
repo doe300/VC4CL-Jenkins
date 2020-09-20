@@ -26,10 +26,11 @@ Since this reboot is not really supported by Jenkins (AFAIK), the code for that 
 - Launch method should be set to "Launch agents via SSH"
 - Number of executors must be set to 1
 - Required software:
-  * clang-3.9, llvm-3.9 (for the CI packages, other versions might be required for locally build packages)
+  * clang-6.0, llvm-6.0 (for the CI packages, other versions might be required for locally build packages)
   * ssh (also properly configured, for the Jenkins slave agent)
   * opencl-c-headers, ocl-icd-opencl-dev
   * grep, cat, tee, perl
+  * spirv-tools (for optional SPIR-V linkage support required by some OpenCL CTS tess)
 
 ### Jenkins Job configuration
 

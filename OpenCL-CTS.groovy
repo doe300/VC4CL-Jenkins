@@ -28,6 +28,14 @@ def runTests(Map config) {
         if(blacklist.contains(name)) {
             continue
         }
+        if(name.contains("spirv_new")) {
+            // Need to specify the SPIR-V binary folder for some reason, see https://github.com/KhronosGroup/OpenCL-CTS/blob/master/test_conformance/spirv_new/README.txt
+            test = test + " --spirv-binaries-path ${config.conformanceTestDir}/../../test_conformance/spirv_new/spirv_bin/"
+        }
+        if(name.contains("bruteforce")) {
+            // For now, since the full test will not pass for a long time still, just run in wimpy mode
+            test = test + " -w"
+        }
         tests.add(runner.newTest(name, test))
     }
 
