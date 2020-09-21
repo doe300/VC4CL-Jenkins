@@ -78,6 +78,7 @@ def installPackages(String scriptDir, Map args = null) {
     sh 'sudo dpkg --status vc4c'
     sh 'sudo dpkg --status vc4cl'
     sh 'sudo dpkg --status vc4cl-stdlib'
+    sh '/usr/local/bin/vc4c --version'
 
     // So we do not implicitly return the result of the last command
     return
