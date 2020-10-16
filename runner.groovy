@@ -167,7 +167,7 @@ def runTests(Map config) {
                 }
 
                 // run the reports
-                echo 'Generating test report, this could take a while...'
+                echo 'Generating test report...'
                 def report_file = junit_scripts.generateReport(name: test.name, tests: test_result)
                 junit report_file
 
