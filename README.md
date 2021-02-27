@@ -20,21 +20,23 @@ Since this reboot is not really supported by Jenkins (AFAIK), the code for that 
 ### Base Jenkins configuration
 - Shell executable (Jenkins > configuration) needs to be set to `/bin/bash` or a compatible shell
 
-### Jenkins slave setup
-- Scripts are written to use a single Jenkins slave for now
+### Jenkins worker setup
+- Scripts are written to use a single Jenkins worker for now
 - Needs the labels: `llvm39 run_env slave`
 - Launch method should be set to "Launch agents via SSH"
 - Number of executors must be set to 1
 - Required software:
   * clang-6.0, llvm-6.0 (for the CI packages, other versions might be required for locally build packages)
-  * ssh (also properly configured, for the Jenkins slave agent)
-  * opencl-c-headers, ocl-icd-opencl-dev
+  * git, cmake, build-essentials
+  * ssh (also properly configured, for the Jenkins worker agent)
+  * opencl-c-headers, ocl-icd-opencl-dev, ocl-icd-libopencl1
   * grep, cat, tee, perl
-  * spirv-tools (for optional SPIR-V linkage support required by some OpenCL CTS tess)
+  * spirv-tools (for optional SPIR-V linkage support required by some OpenCL CTS tests)
+- Optionally disable all not-needed components and services (e.g. in `raspi-config`) for more available memory
 
 ### Jenkins Job configuration
 
-Given a correctly setup Jenkins slave, the Job setup is quite straight-forward.
+Given a correctly setup Jenkins worker, the Job setup is quite straight-forward.
 The only required configuration is shown in the image below with the example of the clpeak workflow.
 
 ![alt text](./screenshot-clpeak.png?raw=true "Clpeak SCM configuration")
@@ -66,7 +68,7 @@ Requires:
 
 Results:
 - Expected result: unstable (test failures)
-- Expected runtime: 3-5h
+- Expected runtime: 1-2h
 - Generates JUnit test results (one per test executable)
 - Generates test duration plots (one per test executable)
 
@@ -84,6 +86,20 @@ Results:
 - Generates JUnit test results (one per test executable)
 - Generates test duration plots (one per test executable)
 - Generates performance plots (one per test executable)
+
+### Jenkinsfile_piglit
+Runs the OpenCL tests of the [piglit](https://gitlab.freedesktop.org/mesa/piglit) Mesa test-suite.
+
+Requires:
+- python3, python3-mako, python3-numpy, freeglut3-dev (or libwaffle-dev)
+- A properly set-up build of [piglit](https://gitlab.freedesktop.org/mesa/piglit). Only the OpenCL tests need to be built. NOTE: The build needs to be in-tree for the test to find the required files!
+- The `PIGLIT_PATH` environment variable should be set to the piglit executable, e.g. `<piglit>/piglit`
+
+Results:
+- Expected result: some failures
+- Expected runtime: 1-2h
+- Generates JUnit test results (one per test)
+- Generates single test duration plot
 
 ### Jenkinsfile_Test
 Runs some quick tests, mainly to test the behavior of these scripts themselves.

@@ -77,6 +77,7 @@ class TestResult {
  *                     will be used to determine whether the test has passed (returns true) or failed (returns false). If not set, a test is assumed to have passed when it's return value is zero (0).
  * - extractProfile - if set, this function takes a TestResult object and returns a String to the file used to extract profiling information from
  * - skipCleanup - if set, the cleanup will be skipped, i.e. the packages for VC4C, VC4CL and VC4CLStdLib will not be uninstalled after the tests have run
+ * - generateTestReport - if set, this function takes a TestResult object and returns a String to the file(s) which contain the JUnit report(s)
  */
 def runTests(Map config) {
 
@@ -127,6 +128,7 @@ def runTests(Map config) {
                         // we also come here for FAILED tests, so don't overwrite the actual FAILED test result
                         time_end = (new Date()).getTime()
                         duration = (time_end - time_start) / 1000
+                        // TODO for timeout we do not get any stdout/stderr output at all!
                         test_result = [junit_scripts.createTimeout(name: test.name, timeInSeconds: duration)]
                     }
 
@@ -168,7 +170,12 @@ def runTests(Map config) {
 
                 // run the reports
                 echo 'Generating test report...'
-                def report_file = junit_scripts.generateReport(name: test.name, tests: test_result)
+                String report_file = null
+                if (config.containsKey('generateTestReport') && config.generateTestReport != null) {
+                    report_file = config.generateTestReport(result)
+                } else {
+                    report_file = junit_scripts.generateReport(name: test.name, tests: test_result)
+                }
                 junit report_file
 
                 //write the CSV file for the time result
