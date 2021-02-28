@@ -18,11 +18,7 @@ def runTests(Map config) {
     echo "Getting list of tests..."
     test_files = sh returnStdout: true, script: "find ${config.boostComputeDir} -name 'test_*' -executable -type f | sort"
     test_files = test_files.split('\n')
-    blacklist = [
-        // These kill Jenkins (slave), sometimes causes ALL following processes to SEGFAULT somewhere!
-        'test_radix_sort',
-        'test_radix_sort_by_key'
-    ]
+    blacklist = []
     // TODO have list (overrideable via parameter) of all tests (grouped), run all of them. E.g. move the test detection to default of parameters?
     tests = []
     for (test in test_files) {

@@ -22,7 +22,7 @@ def runTests(Map config) {
     // we do not need this, since piglit already generates JUnit results
     generateDummyResult = {}
     // simply point to the piglit output directory
-    getReportFolder = {test_result -> '/tmp/piglit-results/*.xml'}
+    getReportFolder = {test_result -> '/tmp/piglit-results/results.xml'}
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, generateTestResults: generateDummyResult, extractProfile: null, generateTestReport: getReportFolder)
 
     // Reset all local variables to prevent our serialization stack overflow...
