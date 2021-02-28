@@ -13,16 +13,25 @@ def runTests(Map config) {
     // Load required libraries
     runner = load "${config.scriptDir}/runner.groovy"
 
+    def resultsFolder = "junit"
+
     // Run the various piglit OpenCL tests and report test results as well as profiling information
     tests = [
+        // can use 'glslparser' as fast skip-all test to just test the Jenkins scripts
+        // runner.newTest('skip', 'glslparser'),
         runner.newTest('all', 'cl'),
     ]
     
-    createTestCommand = {test -> "sudo ${config.piglitPath} run --sync --no-concurrency --backend junit --junit-subtests --verbose --overwrite ${test.commandArg} /tmp/piglit-results"}
+    createTestCommand = {test -> "sudo ${config.piglitPath} run --sync --no-concurrency --backend junit --junit-subtests --verbose --overwrite ${test.commandArg} ${resultsFolder}"}
     // we do not need this, since piglit already generates JUnit results
     generateDummyResult = {}
     // simply point to the piglit output directory
-    getReportFolder = {test_result -> '/tmp/piglit-results/results.xml'}
+    getReportFolder = {test_result ->
+        // make sure Jenkins can actually read the file
+        outFile = "${resultsFolder}/results.xml"
+        sh "sudo chmod 666 ${outFile}"
+        return outFile
+    }
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, generateTestResults: generateDummyResult, extractProfile: null, generateTestReport: getReportFolder)
 
     // Reset all local variables to prevent our serialization stack overflow...
