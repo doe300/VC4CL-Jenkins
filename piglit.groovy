@@ -22,16 +22,11 @@ def runTests(Map config) {
         runner.newTest('all', 'cl'),
     ]
     
-    createTestCommand = {test -> "sudo ${config.piglitPath} run --sync --no-concurrency --backend junit --junit-subtests --verbose --overwrite ${test.commandArg} ${resultsFolder}"}
+    createTestCommand = {test -> "${config.piglitPath} run --sync --no-concurrency --backend junit --junit-subtests --verbose --overwrite ${test.commandArg} ${resultsFolder}"}
     // we do not need this, since piglit already generates JUnit results
     generateDummyResult = {}
     // simply point to the piglit output directory
-    getReportFolder = {test_result ->
-        // make sure Jenkins can actually read the file
-        outFile = "${resultsFolder}/results.xml"
-        sh "sudo chmod 666 ${outFile}"
-        return outFile
-    }
+    getReportFolder = {test_result -> "${resultsFolder}/results.xml"}
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, generateTestResults: generateDummyResult, extractProfile: null, generateTestReport: getReportFolder)
 
     // Reset all local variables to prevent our serialization stack overflow...

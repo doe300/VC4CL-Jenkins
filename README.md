@@ -9,7 +9,6 @@ The setup steps required are documented in the specific Jenkins files.
 ## General Notes
 Due to the nature of the tests, the actual tests need to be run on an actual Raspberry Pi (**NOT Raspberry Pi 4!**)
 as well as on the actual OS. Containerization is not possible due to the low-level hardware access.
-Also, all tests have to be run as *root* on the executing machine.
 
 Wrong code running on the Raspberry Pi VideoCore IV GPU as well as wrong values written to hardware registers can completely screw up the runner.
 Thus, the scripts will reboot the test runner after every failed test to reset the system into a known good state and rule our impacting successive tests.
@@ -54,7 +53,7 @@ Requires:
 
 Results:
 - Expected result: unstable (test failures)
-- Expected runtime: 10 - 12h
+- Expected runtime: 19h
 - Generates JUnit test results (one per test executable)
 - Generates test duration plots (one per test executable)
 

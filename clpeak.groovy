@@ -19,11 +19,12 @@ def runTests(Map config) {
         runner.newTest('compute-sp', '--compute-sp', 'GFLOP/s', '/clpeak/platform/device/single_precision_compute/*'),
         runner.newTest('compute-integer', '--compute-integer', 'GIOP/s', '/clpeak/platform/device/integer_compute/*'),
         runner.newTest('compute-intfast', '--compute-intfast', 'GIOP/s', '/clpeak/platform/device/integer_compute_fast/*'),
+        // TODO split graphs for enqueue(un)map and rest, since they differ too much, how?
         runner.newTest('transfer-bandwidth', '--transfer-bandwidth', 'GB/s', '/clpeak/platform/device/transfer_bandwidth/*'),
         runner.newTest('kernel-latency', '--kernel-latency', 'us', '/clpeak/platform/device/*')
     ]
     
-    createTestCommand = {test -> "sudo ${config.clpeakPath} ${test.commandArg} --enable-xml-dump --xml-file ${test.name}.xml"}
+    createTestCommand = {test -> "${config.clpeakPath} ${test.commandArg} --enable-xml-dump --xml-file ${test.name}.xml"}
     extractTestProfile = {test -> "${test.name}.xml"}
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, extractProfile: extractTestProfile)
 

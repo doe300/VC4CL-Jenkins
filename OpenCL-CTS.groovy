@@ -7,6 +7,7 @@
  *
  * Optional parameters:
  * - setupConfig - if set, this object will be passed to the #installPackages() function (see setup.groovy) to customize the package installation
+ * - blacklist - if set, contains a string with comma-separated test names which will be skipped from this execution
  */
 def runTests(Map config) {
 
@@ -18,9 +19,11 @@ def runTests(Map config) {
     echo "Getting list of tests..."
     test_files = sh returnStdout: true, script: "find ${config.conformanceTestDir} -name 'test_*' -executable -type f | sort"
     test_files = test_files.split('\n')
-    blacklist = [
+    fixed_blacklist = [
         'test_printf' // Completely hangs Jenkins (slave), can't even abort properly anymore
     ]
+    dynamic_blacklist = config.containsKey('blacklist') ? config['blacklist'].split(',') : []
+    blacklist = fixed_blacklist + dynamic_blacklist
     // TODO have list (overrideable via parameter) of all tests (grouped), run all of them. E.g. move the test detection to default of parameters?
     tests = []
     for (test in test_files) {
@@ -39,7 +42,7 @@ def runTests(Map config) {
         tests.add(runner.newTest(name, test))
     }
 
-    createTestCommand = {test -> "sudo ${test.commandArg}"}
+    createTestCommand = {test -> "${test.commandArg}"}
     hasTestPassed = { returnValue, stdoutFile, stderrFile ->
         // If some tests fail normally (e.g. checks fail), the return value is still reported as success (0), so we need to also check the output
         errorInStdout = sh returnStdout: true, script: "grep -P 'FAILED (\\d+ of \\d+ )?test' ${stdoutFile} || echo 'PASSED'"

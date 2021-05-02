@@ -7,6 +7,7 @@
  *
  * Optional parameters:
  * - setupConfig - if set, this object will be passed to the #installPackages() function (see setup.groovy) to customize the package installation
+ * - blacklist - if set, contains a string with comma-separated test names which will be skipped from this execution
  */
 def runTests(Map config) {
 
@@ -18,7 +19,9 @@ def runTests(Map config) {
     echo "Getting list of tests..."
     test_files = sh returnStdout: true, script: "find ${config.boostComputeDir} -name 'test_*' -executable -type f | sort"
     test_files = test_files.split('\n')
-    blacklist = []
+    fixed_blacklist = []
+    dynamic_blacklist = config.containsKey('blacklist') ? config['blacklist'].split(',') : []
+    blacklist = fixed_blacklist + dynamic_blacklist
     // TODO have list (overrideable via parameter) of all tests (grouped), run all of them. E.g. move the test detection to default of parameters?
     tests = []
     for (test in test_files) {
@@ -29,7 +32,7 @@ def runTests(Map config) {
         tests.add(runner.newTest(name, test))
     }
 
-    createTestCommand = {test -> "sudo ${test.commandArg}"}
+    createTestCommand = {test -> "${test.commandArg}"}
     // TODO set config.generateTestResults to extract log/detailed test cases from stdout/stderr
     runner.runTests(scriptDir: config.scriptDir, setupConfig: config.setupConfig, tests: tests, createCommand: createTestCommand, extractProfile: null)
 
